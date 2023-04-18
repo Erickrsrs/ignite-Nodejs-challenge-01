@@ -50,10 +50,12 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params;
       const { title, description } = req.body;
+      const now = new Date();
 
       database.update('tasks', id, {
         title,
         description,
+        updated_at: now.toISOString(),
       });
 
       return res.writeHead(200).end();

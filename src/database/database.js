@@ -45,4 +45,26 @@ export class Database {
     this.#persist();
     return data;
   }
+
+  update(table, id, data) {
+    const rowIndex = this.#database[table].findIndex((row) => row.id === id);
+
+    if (rowIndex > -1) {
+      for (const key in data) {
+        if (data[key] !== undefined) {
+          this.#database[table][rowIndex][key] = data[key];
+        }
+      }
+      this.#persist();
+    }
+  }
+
+  delete(table, id) {
+    const rowindex = this.#database[table].findIndex((row) => row.id === id);
+
+    if (rowindex > -1) {
+      this.#database[table].splice(rowindex, 1);
+      this.#persist();
+    }
+  }
 }

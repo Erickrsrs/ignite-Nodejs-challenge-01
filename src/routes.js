@@ -75,7 +75,17 @@ export const routes = [
     method: 'PATCH',
     path: buildRoutePath('/tasks/:id/complete'),
     handler: (req, res) => {
-      res.end('vpatch');
+      const { id } = req.params;
+      const now = new Date();
+
+      const task = database.selectById('tasks', id);
+
+      database.update('tasks', id, {
+        completed_at: task.completed_at ? null : now.toISOString(),
+        updated_at: now.toISOString(),
+      });
+
+      return res.writeHead(200).end();
     },
   },
 ];

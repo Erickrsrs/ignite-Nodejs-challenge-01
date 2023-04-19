@@ -58,6 +58,7 @@ export class Database {
       for (const key in data) {
         if (data[key] !== undefined) {
           this.#database[table][rowIndex][key] = data[key];
+          return this.#database[table][rowIndex];
         }
       }
       this.#persist();
@@ -68,8 +69,9 @@ export class Database {
     const rowindex = this.#database[table].findIndex((row) => row.id === id);
 
     if (rowindex > -1) {
-      this.#database[table].splice(rowindex, 1);
+      const task = this.#database[table].splice(rowindex, 1);
       this.#persist();
+      return task;
     }
   }
 }

@@ -28,20 +28,26 @@ export const routes = [
     method: 'POST',
     path: buildRoutePath('/tasks'),
     handler: (req, res) => {
-      const { title, description } = req.body;
-      const now = new Date();
+      try {
+        const { title, description } = req.body;
+        const now = new Date();
 
-      const task = {
-        id: randomUUID(),
-        title,
-        description,
-        completed_at: null,
-        created_at: now.toISOString(),
-        updated_at: now.toISOString(),
-      };
+        const task = {
+          id: randomUUID(),
+          title,
+          description,
+          completed_at: null,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+        };
 
-      database.insert('tasks', task);
-      return res.writeHead(201).end();
+        database.insert('tasks', task);
+        return res.writeHead(201).end();
+      } catch (e) {
+        return res
+          .writeHead(404)
+          .end(JSON.stringify({ message: 'Title and description not found.' }));
+      }
     },
   },
   {
@@ -49,16 +55,30 @@ export const routes = [
     path: buildRoutePath('/tasks/:id'),
     handler: (req, res) => {
       const { id } = req.params;
-      const { title, description } = req.body;
-      const now = new Date();
+      try {
+        const { title, description } = req.body;
+        const now = new Date();
 
-      database.update('tasks', id, {
-        title,
-        description,
-        updated_at: now.toISOString(),
-      });
+        const task = database.update('tasks', id, {
+          title,
+          description,
+          updated_at: now.toISOString(),
+        });
 
-      return res.writeHead(200).end();
+        if (!task) {
+          return res
+            .writeHead(404)
+            .end(
+              JSON.stringify({ message: 'Task not found, try another id.' })
+            );
+        }
+
+        return res.writeHead(200).end();
+      } catch (e) {
+        return res
+          .writeHead(404)
+          .end(JSON.stringify({ message: 'Title or description not found.' }));
+      }
     },
   },
   {
@@ -66,7 +86,13 @@ export const routes = [
     path: buildRoutePath('/tasks/:id'),
     handler: (req, res) => {
       const { id } = req.params;
-      database.delete('tasks', id);
+      const task = database.delete('tasks', id);
+
+      if (!task) {
+        return res
+          .writeHead(404)
+          .end(JSON.stringify({ message: 'Task not found, try another id.' }));
+      }
 
       return res.writeHead(200).end();
     },
@@ -79,6 +105,12 @@ export const routes = [
       const now = new Date();
 
       const task = database.selectById('tasks', id);
+
+      if (!task) {
+        return res
+          .writeHead(404)
+          .end(JSON.stringify({ message: 'Task not found, try another id.' }));
+      }
 
       database.update('tasks', id, {
         completed_at: task.completed_at ? null : now.toISOString(),
